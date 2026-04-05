@@ -1,0 +1,534 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  /* Brand color extensions */
+  --color-brand: var(--brand-color);
+  --color-brand-light: var(--brand-light);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-bg: var(--brand-bg);
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #475569;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #475569;
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #7c3aed;
+  --chart-1: #7c3aed;
+  --chart-2: #06b6d4;
+  --chart-3: #10b981;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #7c3aed;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #475569;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #7c3aed;
+  
+  /* Brand color variables */
+  --brand-color: #7c3aed;
+  --brand-color-rgb: 124, 58, 237;
+  --brand-light: #a78bfa;
+  --brand-light-rgb: 167, 139, 250;
+  --brand-dark: #6d28d9;
+  --brand-dark-rgb: 109, 40, 217;
+  --brand-bg: rgba(124, 58, 237, 0.1);
+  --brand-border: rgba(124, 58, 237, 0.2);
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  --primary: #a78bfa;
+  --primary-foreground: #0f172a;
+  --secondary: #334155;
+  --secondary-foreground: #f8fafc;
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+  --accent: #334155;
+  --accent-foreground: #f8fafc;
+  --destructive: #f87171;
+  --border: #334155;
+  --input: #334155;
+  --ring: #a78bfa;
+  --chart-1: #a78bfa;
+  --chart-2: #22d3ee;
+  --chart-3: #34d399;
+  --chart-4: #fbbf24;
+  --chart-5: #f87171;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #a78bfa;
+  --sidebar-primary-foreground: #0f172a;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #334155;
+  --sidebar-ring: #a78bfa;
+  
+  /* Brand color variables - dark mode uses lighter version */
+  --brand-color: #a78bfa;
+  --brand-color-rgb: 167, 139, 250;
+  --brand-light: #c4b5fd;
+  --brand-light-rgb: 196, 181, 253;
+  --brand-dark: #7c3aed;
+  --brand-dark-rgb: 124, 58, 237;
+  --brand-bg: rgba(167, 139, 250, 0.15);
+  --brand-border: rgba(167, 139, 250, 0.25);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ========================================
+   BRAND COLOR SYSTEM - Dynamic theming
+   ======================================== */
+
+/* Brand background variants */
+.bg-brand { background-color: var(--brand-color) !important; }
+.bg-brand-light { background-color: var(--brand-light) !important; }
+.bg-brand-dark { background-color: var(--brand-dark) !important; }
+.bg-brand-10 { background-color: var(--brand-bg) !important; }
+.bg-brand-20 { background-color: rgba(var(--brand-color-rgb), 0.2) !important; }
+.bg-brand-30 { background-color: rgba(var(--brand-color-rgb), 0.3) !important; }
+
+/* Brand text variants */
+.text-brand { color: var(--brand-color) !important; }
+.text-brand-light { color: var(--brand-light) !important; }
+.text-brand-dark { color: var(--brand-dark) !important; }
+
+/* Brand border variants */
+.border-brand { border-color: var(--brand-color) !important; }
+.border-brand-light { border-color: var(--brand-light) !important; }
+.border-brand-20 { border-color: var(--brand-border) !important; }
+.border-brand-30 { border-color: rgba(var(--brand-color-rgb), 0.3) !important; }
+
+/* Brand icon container - works in light and dark mode */
+.icon-container-brand {
+  background-color: rgba(var(--brand-color-rgb), 0.1) !important;
+  color: var(--brand-color) !important;
+}
+
+.dark .icon-container-brand {
+  background-color: rgba(var(--brand-color-rgb), 0.2) !important;
+  color: var(--brand-light) !important;
+}
+
+/* Brand gradients */
+.bg-gradient-brand {
+  background: linear-gradient(135deg, var(--brand-color), var(--brand-dark)) !important;
+}
+
+.bg-gradient-brand-light {
+  background: linear-gradient(135deg, var(--brand-bg), rgba(var(--brand-color-rgb), 0.05)) !important;
+}
+
+.bg-gradient-brand-vertical {
+  background: linear-gradient(180deg, var(--brand-bg), transparent) !important;
+}
+
+/* Brand ring/focus */
+.ring-brand {
+  --tw-ring-color: var(--brand-color) !important;
+}
+
+/* Brand shadows */
+.shadow-brand {
+  box-shadow: 0 4px 14px 0 rgba(var(--brand-color-rgb), 0.25) !important;
+}
+
+.shadow-brand-lg {
+  box-shadow: 0 10px 40px 0 rgba(var(--brand-color-rgb), 0.3) !important;
+}
+
+/* Brand hover states */
+.hover\:bg-brand:hover { background-color: var(--brand-color) !important; }
+.hover\:bg-brand-10:hover { background-color: var(--brand-bg) !important; }
+.hover\:text-brand:hover { color: var(--brand-color) !important; }
+.hover\:border-brand:hover { border-color: var(--brand-color) !important; }
+
+/* Brand card styling */
+.card-brand {
+  background: linear-gradient(135deg, var(--brand-color), var(--brand-dark));
+  color: white;
+  border: none;
+}
+
+.card-brand-light {
+  background: white;
+  border: 1px solid var(--brand-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-brand-light::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--brand-color), var(--brand-light));
+}
+
+.dark .card-brand-light {
+  background: var(--card);
+  border-color: var(--brand-border);
+}
+
+.dark .card-brand-light::before {
+  background: linear-gradient(90deg, var(--brand-light), var(--brand-color));
+}
+
+/* Brand tab indicator */
+.tab-brand[data-state="active"] {
+  color: var(--brand-color);
+  border-bottom-color: var(--brand-color);
+}
+
+/* Brand icon backgrounds */
+.icon-brand-bg {
+  background-color: var(--brand-bg);
+  color: var(--brand-color);
+}
+
+.dark .icon-brand-bg {
+  background-color: rgba(var(--brand-color-rgb), 0.2);
+  color: var(--brand-light);
+}
+
+/* Brand badge */
+.badge-brand {
+  background-color: var(--brand-bg);
+  color: var(--brand-dark);
+  border: 1px solid var(--brand-border);
+}
+
+.dark .badge-brand {
+  background-color: rgba(var(--brand-color-rgb), 0.2);
+  color: var(--brand-light);
+  border-color: var(--brand-border);
+}
+
+/* Brand progress bar */
+.progress-brand {
+  background-color: var(--brand-bg);
+}
+
+.progress-brand > div {
+  background: linear-gradient(90deg, var(--brand-color), var(--brand-light));
+}
+
+/* Brand avatar */
+.avatar-brand {
+  background: linear-gradient(135deg, var(--brand-color), var(--brand-dark));
+  color: white;
+}
+
+/* Brand input focus */
+.input-brand:focus {
+  border-color: var(--brand-color);
+  box-shadow: 0 0 0 3px rgba(var(--brand-color-rgb), 0.1);
+}
+
+/* Brand selection */
+::selection {
+  background-color: rgba(var(--brand-color-rgb), 0.2);
+  color: var(--brand-dark);
+}
+
+.dark ::selection {
+  background-color: rgba(var(--brand-color-rgb), 0.3);
+  color: var(--brand-light);
+}
+
+/* Brand scrollbar */
+.brand-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--brand-color);
+}
+
+.brand-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-dark);
+}
+
+/* ========================================
+   CUSTOM SCROLLBAR
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ========================================
+   ANIMATION CLASSES
+   ======================================== */
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   STATUS COLORS
+   ======================================== */
+
+.status-active {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-paused {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.dark .status-active {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+}
+
+.dark .status-paused {
+  background-color: rgba(251, 191, 36, 0.2);
+  color: #fcd34d;
+}
+
+.dark .status-cancelled {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+/* ========================================
+   DARK MODE OVERRIDES
+   ======================================== */
+
+.dark .from-violet-100 {
+  --tw-gradient-from: rgba(167, 139, 250, 0.2) var(--tw-gradient-from-position);
+}
+
+.dark .to-purple-100 {
+  --tw-gradient-to: rgba(139, 92, 246, 0.2) var(--tw-gradient-to-position);
+}
+
+.dark .from-emerald-100 {
+  --tw-gradient-from: rgba(52, 211, 153, 0.2) var(--tw-gradient-from-position);
+}
+
+.dark .to-green-100 {
+  --tw-gradient-to: rgba(74, 222, 128, 0.2) var(--tw-gradient-to-position);
+}
+
+.dark .from-red-100 {
+  --tw-gradient-from: rgba(248, 113, 113, 0.2) var(--tw-gradient-from-position);
+}
+
+.dark .to-rose-100 {
+  --tw-gradient-to: rgba(254, 164, 138, 0.2) var(--tw-gradient-to-position);
+}
+
+.dark .from-blue-100 {
+  --tw-gradient-from: rgba(96, 165, 250, 0.2) var(--tw-gradient-from-position);
+}
+
+.dark .to-indigo-100 {
+  --tw-gradient-to: rgba(129, 140, 248, 0.2) var(--tw-gradient-to-position);
+}
+
+.dark .from-amber-100 {
+  --tw-gradient-from: rgba(251, 191, 36, 0.2) var(--tw-gradient-from-position);
+}
+
+.dark .to-orange-100 {
+  --tw-gradient-to: rgba(251, 146, 60, 0.2) var(--tw-gradient-to-position);
+}
+
+.dark .to-teal-100 {
+  --tw-gradient-to: rgba(45, 212, 191, 0.2) var(--tw-gradient-to-position);
+}
+
+/* Shadow adjustments for dark mode */
+.dark .shadow-slate-200\/50 {
+  --tw-shadow-color: rgba(51, 65, 85, 0.5);
+}
+
+.dark .shadow-violet-200 {
+  --tw-shadow-color: rgba(167, 139, 250, 0.3);
+}
+
+.dark .shadow-emerald-200 {
+  --tw-shadow-color: rgba(52, 211, 153, 0.3);
+}
+
+.dark .shadow-red-200 {
+  --tw-shadow-color: rgba(248, 113, 113, 0.3);
+}
+
+.dark .shadow-blue-200 {
+  --tw-shadow-color: rgba(96, 165, 250, 0.3);
+}
+
+.dark .shadow-amber-200 {
+  --tw-shadow-color: rgba(251, 191, 36, 0.3);
+}
+
+/* Badge adjustments for dark mode */
+.dark .bg-emerald-100 {
+  background-color: rgba(52, 211, 153, 0.2);
+}
+
+.dark .text-emerald-700 {
+  color: #86efac;
+}
+
+.dark .bg-amber-100 {
+  background-color: rgba(251, 191, 36, 0.2);
+}
+
+.dark .text-amber-700 {
+  color: #fcd34d;
+}
+
+.dark .bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+.dark .text-red-700 {
+  color: #fca5a5;
+}
+
+.dark .bg-violet-100 {
+  background-color: rgba(167, 139, 250, 0.2);
+}
+
+.dark .text-violet-700 {
+  color: #c4b5fd;
+}
+
+/* Chart tooltip dark mode */
+.dark .recharts-tooltip-wrapper [style*="background-color: white"] {
+  background-color: #1e293b !important;
+}
+
+/* Gradient background for dark mode */
+.dark .bg-gradient-to-br.from-slate-50 {
+  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+  --tw-gradient-from: #0f172a var(--tw-gradient-from-position);
+  --tw-gradient-to: #0f172a var(--tw-gradient-to-position);
+}
+
+.dark .bg-gradient-to-br.via-white {
+  --tw-gradient-via: #1e293b var(--tw-gradient-via-position);
+}
+
+.dark .bg-gradient-to-br.to-violet-50 {
+  --tw-gradient-to: #1e293b var(--tw-gradient-to-position);
+}

@@ -1,0 +1,17 @@
+.vercel
+node_modules/
+.next/
+crm-setup/.next/
+download/
+downloads/
+skills/
+examples/
+supabase/
+*.zip
+*.db
+*.log
+*.md
+!README.md
+.env
+.env.local
+.env*.local
