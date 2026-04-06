@@ -1,7 +1,6 @@
 .vercel
 node_modules/
 .next/
-crm-setup/.next/
 download/
 downloads/
 skills/
@@ -15,3 +14,26 @@ supabase/
 .env
 .env.local
 .env*.local
+
+# System files
+.accesslog
+.config
+.juicefs-config
+.stats
+.zscripts
+crm-setup/
+
+# Migration scripts
+migrate-*.ts
+migrate-*.mjs
+run-*.mjs
+*-rls.mjs
+check-db.mjs
+seed-*.mjs
+disable-*.mjs
+update-*.mjs
+schema-fix.prisma
+
+# Build artifacts
+tsconfig.tsbuildinfo
+bun.lock
