@@ -74,8 +74,6 @@ model Client {
   address        String?
   city           String?
   country        String?
-  canton         String?
-  district       String?
   website        String?
   lastActivityAt DateTime?
   totalRevenue   Decimal?        @default(0)
