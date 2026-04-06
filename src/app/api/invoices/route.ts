@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { Decimal } from '@prisma/client/runtime/library'
 import { getCurrentUser, getCompanyId } from '@/lib/auth'
+import { triggerInvoiceWebhook } from '@/lib/webhooks'
 
 // GET - List invoices
 export async function GET(request: NextRequest) {
@@ -213,6 +214,20 @@ export async function POST(request: NextRequest) {
         items: true,
         client: true
       }
+    })
+    
+    // Trigger webhook for invoice created
+    await triggerInvoiceWebhook('invoice.created', {
+      id: invoice.id,
+      number: invoice.number,
+      clientId: invoice.clientId,
+      clientName: invoice.clientName,
+      total: Number(invoice.total),
+      status: invoice.status
+    }, currentUser.companyId, {
+      id: currentUser.id,
+      name: currentUser.name,
+      email: currentUser.email
     })
     
     return NextResponse.json({

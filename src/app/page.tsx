@@ -31,7 +31,7 @@ import {
   Maximize2, Minimize2, Languages, LogOut, Download, FileSpreadsheet,
   UserPlus, Receipt, CalendarClock, SlidersHorizontal, Sun, Moon, Lock,
   CreditCard, Send, ChevronDown, Palette, Upload, ImageIcon, StickyNote,
-  MessageCircle, Bot, Loader2
+  MessageCircle, Bot, Loader2, Webhook
 } from 'lucide-react'
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -2903,6 +2903,11 @@ export default function Dashboard() {
               {hasPermission('config') && (
               <Button variant="ghost" size="icon" onClick={() => setShowConfigDialog(true)} className="relative h-9 w-9" title="Configuración">
                 <Settings className="h-4 w-4 text-muted-foreground" />
+              </Button>
+              )}
+              {hasPermission('config') && (
+              <Button variant="ghost" size="icon" onClick={() => router.push('/webhooks')} className="relative h-9 w-9" title="Webhooks">
+                <Webhook className="h-4 w-4 text-muted-foreground" />
               </Button>
               )}
               <Button variant="ghost" size="icon" onClick={() => router.push('/settings')} className="relative h-9 w-9" title="Empresa y Empleados">

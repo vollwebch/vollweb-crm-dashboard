@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { ClientStatus } from '@prisma/client';
 import { getCurrentUser, getCompanyId } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
+import { triggerClientWebhook } from '@/lib/webhooks';
 
 // GET /api/clients - Listar todos los clientes con filtros avanzados
 export async function GET(request: NextRequest) {
@@ -209,6 +210,13 @@ export async function POST(request: NextRequest) {
       newValue: JSON.stringify({ name, company, email, phone, status }),
       description: `Cliente "${company}" creado`,
       companyId: currentUser.companyId,
+    });
+
+    // Trigger webhook
+    await triggerClientWebhook('client.created', client, currentUser.companyId, {
+      id: currentUser.id,
+      name: currentUser.name,
+      email: currentUser.email
     });
 
     return NextResponse.json(client, { status: 201 });

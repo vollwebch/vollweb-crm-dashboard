@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { ClientStatus } from '@prisma/client';
 import { getCurrentUser } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
+import { triggerClientWebhook } from '@/lib/webhooks';
 
 // GET /api/clients/[id] - Obtener cliente por ID
 export async function GET(
@@ -256,6 +257,18 @@ export async function DELETE(
         entityName: client.company,
         oldValue: JSON.stringify({ name: client.name, company: client.company, email: client.email }),
         description: `Cliente "${client.company}" movido a papelera`,
+      });
+
+      // Trigger webhook
+      await triggerClientWebhook('client.deleted', {
+        id: client.id,
+        name: client.name,
+        company: client.company,
+        email: client.email
+      }, currentUser.companyId, {
+        id: currentUser.id,
+        name: currentUser.name,
+        email: currentUser.email
       });
     }
 

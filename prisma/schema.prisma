@@ -27,6 +27,7 @@ model Company {
   invoiceCounters    InvoiceCounter[]
   auditLogs          AuditLog[]
   calendarNotes      CalendarNote[]
+  webhooks           Webhook[]
   
   @@map("companies")
 }
@@ -604,4 +605,49 @@ model ClientFile {
   @@index([clientId])
   @@index([category])
   @@map("client_files")
+}
+
+// ============================================
+// WEBHOOKS - Integration with external systems
+// ============================================
+model Webhook {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  secret      String?  // For signature verification
+  events      String   // Comma-separated list of events to trigger
+  active      Boolean  @default(true)
+  description String?
+  lastTriggeredAt DateTime?
+  failureCount Int     @default(0)
+  companyId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  logs        WebhookLog[]
+  
+  @@index([companyId])
+  @@index([active])
+  @@map("webhooks")
+}
+
+model WebhookLog {
+  id           String   @id @default(cuid())
+  webhookId    String
+  event        String
+  payload      String   // JSON payload sent
+  responseStatus Int?   // HTTP status code
+  responseBody String?  // Response from webhook URL
+  success      Boolean  @default(false)
+  error        String?  // Error message if failed
+  duration     Int?     // Duration in ms
+  createdAt    DateTime @default(now())
+  
+  webhook      Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  
+  @@index([webhookId])
+  @@index([createdAt])
+  @@index([success])
+  @@map("webhook_logs")
 }
