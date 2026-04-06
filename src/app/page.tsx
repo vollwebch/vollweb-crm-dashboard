@@ -2787,26 +2787,26 @@ export default function Dashboard() {
       <header className="bg-card/80 backdrop-blur-lg border-b border-border sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 shrink-0">
               {systemConfig?.companyLogo ? (
                 <img 
                   src={systemConfig.companyLogo} 
                   alt={systemConfig.companyName || 'Logo'} 
-                  className="h-10 w-auto object-contain"
+                  className="h-9 w-auto object-contain"
                 />
               ) : (
-              <div className="relative w-10 h-10">
+              <div className="relative w-9 h-9 shrink-0">
                 <div className="absolute inset-0 bg-brand-gradient rounded-xl shadow-brand"></div>
                 <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">V</div>
               </div>
               )}
-              <div>
-                <h1 className="text-xl font-bold text-brand">{systemConfig?.companyName || t('header.title')}</h1>
-                <p className="text-xs text-muted-foreground">{t('header.subtitle')}</p>
+              <div className="flex flex-col justify-center">
+                <h1 className="text-lg font-bold text-brand leading-tight truncate max-w-[140px]">{systemConfig?.companyName || t('header.title')}</h1>
+                <p className="text-xs text-muted-foreground leading-tight">{t('header.subtitle')}</p>
               </div>
             </div>
             
-            <nav className="hidden md:flex items-center justify-center flex-1 gap-2 bg-muted p-1 rounded-xl mx-4">
+            <nav className="hidden md:flex items-center justify-center flex-1 gap-1 bg-muted p-1 rounded-xl mx-2">
               {[
                 { id: 'dashboard', icon: BarChart3, label: t('nav.dashboard'), key: '1', permission: 'stats' as keyof UserPermissions },
                 { id: 'calendar', icon: Calendar, label: 'Calendario', key: '2', permission: 'reminders' as keyof UserPermissions },
@@ -2885,7 +2885,7 @@ export default function Dashboard() {
               )}
             </nav>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 shrink-0">
               {hasPermission('audit') && (
               <Button 
                 variant="ghost" 
@@ -2895,17 +2895,18 @@ export default function Dashboard() {
                   fetchAuditLogs()
                 }} 
                 title="Historial de cambios"
+                className="h-9 w-9"
               >
-                <FileText className="h-5 w-5 text-muted-foreground" />
+                <FileText className="h-4 w-4 text-muted-foreground" />
               </Button>
               )}
               {hasPermission('config') && (
-              <Button variant="ghost" size="icon" onClick={() => setShowConfigDialog(true)} className="relative" title="Configuración">
-                <Settings className="h-5 w-5 text-muted-foreground" />
+              <Button variant="ghost" size="icon" onClick={() => setShowConfigDialog(true)} className="relative h-9 w-9" title="Configuración">
+                <Settings className="h-4 w-4 text-muted-foreground" />
               </Button>
               )}
-              <Button variant="ghost" size="icon" onClick={() => router.push('/settings')} className="relative" title="Empresa y Empleados">
-                <Users className="h-5 w-5 text-muted-foreground" />
+              <Button variant="ghost" size="icon" onClick={() => router.push('/settings')} className="relative h-9 w-9" title="Empresa y Empleados">
+                <Users className="h-4 w-4 text-muted-foreground" />
               </Button>
               {/* Theme Toggle */}
               {mounted && (
@@ -2914,39 +2915,40 @@ export default function Dashboard() {
                   size="icon"
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                   title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-                  className="text-muted-foreground"
+                  className="text-muted-foreground h-9 w-9"
                 >
                   {theme === 'dark' ? (
-                    <Sun className="h-5 w-5 text-yellow-400" />
+                    <Sun className="h-4 w-4 text-yellow-400" />
                   ) : (
-                    <Moon className="h-5 w-5" />
+                    <Moon className="h-4 w-4" />
                   )}
                 </Button>
               )}
               <Button 
                 onClick={() => setShowAddClientDialog(true)}
-                className="bg-gradient-to-r from-brand to-brand-dark hover:from-brand-dark hover:to-brand-dark shadow-lg shadow-brand"
+                size="sm"
+                className="bg-gradient-to-r from-brand to-brand-dark hover:from-brand-dark hover:to-brand-dark shadow-lg shadow-brand h-9"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-1" />
                 {t('header.newClient')}
               </Button>
               {/* User Menu */}
               {user && (
-                <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border">
+                <div className="flex items-center gap-1 ml-2 pl-2 border-l border-border">
                   <Avatar className="h-8 w-8 border-2 border-brand/30">
                     <AvatarFallback className="bg-gradient-to-br from-brand to-brand-dark text-white text-xs font-semibold">
                       {user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="hidden sm:block">
-                    <p className="text-sm font-medium text-foreground">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.role === 'ADMIN' ? 'Administrador' : 'Usuario'}</p>
+                  <div className="hidden lg:block">
+                    <p className="text-sm font-medium text-foreground leading-tight">{user.name}</p>
+                    <p className="text-xs text-muted-foreground leading-tight">{user.role === 'ADMIN' ? 'Admin' : 'Usuario'}</p>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={handleLogout}
-                    className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
+                    className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 h-8 w-8"
                     title="Cerrar sesión"
                   >
                     <LogOut className="h-4 w-4" />
