@@ -2806,7 +2806,7 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <nav className="hidden md:flex items-center justify-center flex-1 gap-1 bg-muted p-1 rounded-xl mx-2">
+            <nav className="hidden md:flex items-center gap-2 bg-muted p-1 rounded-xl ml-4">
               {[
                 { id: 'dashboard', icon: BarChart3, label: t('nav.dashboard'), key: '1', permission: 'stats' as keyof UserPermissions },
                 { id: 'calendar', icon: Calendar, label: 'Calendario', key: '2', permission: 'reminders' as keyof UserPermissions },
