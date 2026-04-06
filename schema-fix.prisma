@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("USER")
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Client {
+  id             String          @id @default(cuid())
+  name           String
+  company        String
+  email          String          @unique
+  phone          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  status         String          @default("ACTIVE")
+  notes          String?
+  deletedAt      DateTime?
+  contractStart  DateTime?
+  contractEnd    DateTime?
+  contractYears  Int?
+  address        String?
+  city           String?
+  country        String?
+  website        String?
+  lastActivityAt DateTime?
+  totalRevenue   Decimal?        @default(0) @db.Decimal(10, 2)
+  activityLogs   ActivityLog[]
+  alarms         ClientAlarm[]
+  services       ClientService[]
+  domains        Domain[]
+  hosting        Hosting[]
+  reminders      Reminder[]
+
+  @@map("clients")
+}
+
+model ClientService {
+  id           String      @id @default(cuid())
+  clientId     String
+  serviceType  String
+  description  String?
+  startDate    DateTime
+  renewalDate  DateTime?
+  monthlyPrice Decimal?    @default(0) @db.Decimal(10, 2)
+  annualPrice  Decimal?    @db.Decimal(10, 2)
+  status       String      @default("ACTIVE")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  client       Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reminders    Reminder[]
+
+  @@map("client_services")
+}
+
+model Hosting {
+  id          String     @id @default(cuid())
+  clientId    String
+  provider    String
+  plan        String
+  username    String?
+  panelUrl    String?
+  password    String?
+  renewalDate DateTime?
+  monthlyCost Decimal?   @default(0) @db.Decimal(10, 2)
+  annualCost  Decimal?   @db.Decimal(10, 2)
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reminders   Reminder[]
+
+  @@map("hosting")
+}
+
+model Domain {
+  id               String     @id @default(cuid())
+  clientId         String
+  domainName       String
+  registrar        String
+  registrationDate DateTime
+  renewalDate      DateTime
+  cost             Decimal?   @default(0) @db.Decimal(10, 2)
+  status           String     @default("ACTIVE")
+  autoRenew        Boolean    @default(false)
+  notes            String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  client           Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reminders        Reminder[]
+
+  @@map("domains")
+}
+
+model Reminder {
+  id           String     @id @default(cuid())
+  type         String
+  entityType   String
+  entityId     String
+  reminderDate DateTime
+  status       String     @default("PENDING")
+  message      String
+  snoozedUntil DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+  clientId     String?
+  serviceId    String?
+  hostingId    String?
+  domainId     String?
+  alarmId      String?
+  client       Client?    @relation(fields: [clientId], references: [id])
+  domain       Domain?    @relation(fields: [domainId], references: [id])
+  hosting      Hosting?   @relation(fields: [hostingId], references: [id])
+  service      ClientService? @relation(fields: [serviceId], references: [id])
+  alarm        ClientAlarm? @relation(fields: [alarmId], references: [id])
+
+  @@map("reminders")
+}
+
+model ClientAlarm {
+  id          String     @id @default(cuid())
+  clientId    String
+  type        String
+  title       String
+  description String?
+  alarmDate   DateTime
+  priority    String     @default("MEDIUM")
+  isActive    Boolean    @default(true)
+  isRecurring Boolean    @default(false)
+  daysBefore  Int        @default(7)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reminders   Reminder[]
+
+  @@map("client_alarms")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  clientId    String
+  action      String
+  description String
+  metadata    String?
+  createdAt   DateTime @default(now())
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("activity_logs")
+}
+
+model NotificationConfig {
+  id                    String   @id @default(cuid())
+  serviceRenewalEnabled Boolean  @default(true)
+  serviceRenewalDays    String   @default("30,14,7,1")
+  domainExpiryEnabled   Boolean  @default(true)
+  domainExpiryDays      String   @default("30,14,7,1")
+  hostingRenewalEnabled Boolean  @default(true)
+  hostingRenewalDays    String   @default("30,14,7,1")
+  contractEndEnabled    Boolean  @default(true)
+  contractEndDays       String   @default("90,60,30,14")
+  anniversaryEnabled    Boolean  @default(true)
+  anniversaryYears      String   @default("1,2,3,4,5,10")
+  inactiveClientEnabled Boolean  @default(true)
+  inactiveClientDays    Int      @default(90)
+  customAlarmsEnabled   Boolean  @default(true)
+  emailNotifications    Boolean  @default(false)
+  pushNotifications     Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("notification_config")
+}
+
+model SystemConfig {
+  id           String   @id @default(cuid())
+  companyName  String   @default("Vollweb")
+  companyLogo  String?
+  primaryColor String   @default("#7c3aed")
+  currency     String   @default("EUR")
+  language     String   @default("es")
+  timezone     String   @default("Europe/Madrid")
+  dateFormat   String   @default("DD/MM/YYYY")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("system_config")
+}
+
+model TrashConfig {
+  id                String   @id @default(cuid())
+  autoDeleteDays    Int      @default(10)
+  autoDeleteEnabled Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("trash_config")
+}

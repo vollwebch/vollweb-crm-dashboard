@@ -1,0 +1,609 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+// ============================================
+// COMPANY - Multi-tenant root entity
+// ============================================
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  users              User[]
+  clients            Client[]
+  systemConfig       SystemConfig?
+  notificationConfig NotificationConfig?
+  trashConfig        TrashConfig?
+  monthlyStats       MonthlyStats[]
+  invoiceCounters    InvoiceCounter[]
+  auditLogs          AuditLog[]
+  calendarNotes      CalendarNote[]
+  
+  @@map("companies")
+}
+
+// ============================================
+// USER - Employees/Admins of a company
+// ============================================
+model User {
+  id          String     @id @default(cuid())
+  name        String
+  email       String     @unique
+  password    String
+  role        String     @default("USER") // ADMIN, USER
+  avatar      String?
+  permissions Json?      // {"clients": false, "payments": false, "invoices": false, ...}
+  companyId   String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  // Relations
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  auditLogs AuditLog[]
+  
+  @@index([companyId])
+  @@map("users")
+}
+
+// ============================================
+// CLIENT - Customers of a company
+// ============================================
+model Client {
+  id             String          @id @default(cuid())
+  name           String
+  company        String          // Customer's company name
+  email          String
+  phone          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  status         ClientStatus    @default(ACTIVE)
+  notes          String?
+  deletedAt      DateTime?
+  contractStart  DateTime?
+  contractEnd    DateTime?
+  contractYears  Int?
+  address        String?
+  city           String?
+  country        String?
+  canton         String?
+  district       String?
+  website        String?
+  lastActivityAt DateTime?
+  totalRevenue   Decimal?        @default(0)
+  taxId          String?         // NIF/CIF
+  postalCode     String?
+  companyId      String
+  
+  // Relations
+  companyObj     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  activityLogs   ActivityLog[]
+  alarms         ClientAlarm[]
+  services       ClientService[]
+  domains        Domain[]
+  hosting        Hosting[]
+  reminders      Reminder[]
+  payments       Payment[]
+  invoices       Invoice[]
+  files          ClientFile[]
+
+  @@unique([companyId, email])
+  @@index([companyId])
+  @@index([status])
+  @@map("clients")
+}
+
+model ClientService {
+  id           String        @id @default(cuid())
+  clientId     String
+  serviceType  ServiceType
+  description  String?
+  startDate    DateTime
+  renewalDate  DateTime?
+  monthlyPrice Decimal       @default(0)
+  annualPrice  Decimal?
+  status       ServiceStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reminders    Reminder[]
+
+  @@index([clientId])
+  @@map("client_services")
+}
+
+model Hosting {
+  id          String     @id @default(cuid())
+  clientId    String
+  provider    String
+  plan        String
+  username    String?
+  panelUrl    String?
+  password    String?
+  renewalDate DateTime?
+  monthlyCost Decimal    @default(0)
+  annualCost  Decimal?
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reminders   Reminder[]
+
+  @@index([clientId])
+  @@map("hosting")
+}
+
+model Domain {
+  id               String       @id @default(cuid())
+  clientId         String
+  domainName       String
+  registrar        String
+  registrationDate DateTime
+  renewalDate      DateTime
+  cost             Decimal      @default(0)
+  status           DomainStatus @default(ACTIVE)
+  autoRenew        Boolean      @default(false)
+  notes            String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  client           Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reminders        Reminder[]
+
+  @@index([clientId])
+  @@map("domains")
+}
+
+model Reminder {
+  id           String         @id @default(cuid())
+  type         ReminderType
+  entityType   String
+  entityId     String
+  reminderDate DateTime
+  status       ReminderStatus @default(PENDING)
+  message      String
+  snoozedUntil DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+  clientId     String?
+  serviceId    String?
+  hostingId    String?
+  domainId     String?
+  alarmId      String?
+  alarm        ClientAlarm?   @relation(fields: [alarmId], references: [id])
+  domain       Domain?        @relation(fields: [domainId], references: [id])
+  hosting      Hosting?       @relation(fields: [hostingId], references: [id])
+  service      ClientService? @relation(fields: [serviceId], references: [id])
+  client       Client?        @relation(fields: [clientId], references: [id])
+
+  @@map("reminders")
+}
+
+model ClientAlarm {
+  id          String        @id @default(cuid())
+  clientId    String
+  type        AlarmType
+  title       String
+  description String?
+  alarmDate   DateTime
+  priority    AlarmPriority @default(MEDIUM)
+  isActive    Boolean       @default(true)
+  isRecurring Boolean       @default(false)
+  daysBefore  Int           @default(7)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reminders   Reminder[]
+
+  @@index([clientId])
+  @@map("client_alarms")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  clientId    String
+  action      String
+  description String
+  metadata    String?
+  createdAt   DateTime @default(now())
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@map("activity_logs")
+}
+
+// ============================================
+// CONFIG TABLES (One per company)
+// ============================================
+model NotificationConfig {
+  id                    String   @id @default(cuid())
+  serviceRenewalEnabled Boolean  @default(true)
+  serviceRenewalDays    String   @default("30,14,7,1")
+  domainExpiryEnabled   Boolean  @default(true)
+  domainExpiryDays      String   @default("30,14,7,1")
+  hostingRenewalEnabled Boolean  @default(true)
+  hostingRenewalDays    String   @default("30,14,7,1")
+  contractEndEnabled    Boolean  @default(true)
+  contractEndDays       String   @default("90,60,30,14")
+  anniversaryEnabled    Boolean  @default(true)
+  anniversaryYears      String   @default("1,2,3,4,5,10")
+  inactiveClientEnabled Boolean  @default(true)
+  inactiveClientDays    Int      @default(90)
+  customAlarmsEnabled   Boolean  @default(true)
+  emailNotifications    Boolean  @default(false)
+  pushNotifications     Boolean  @default(true)
+  companyId             String   @unique
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("notification_config")
+}
+
+model SystemConfig {
+  id                    String   @id @default(cuid())
+  companyName           String   @default("Vollweb")
+  companyLogo           String?
+  primaryColor          String   @default("#7c3aed")
+  currency              String   @default("EUR")
+  language              String   @default("es")
+  timezone              String   @default("Europe/Madrid")
+  dateFormat            String   @default("DD/MM/YYYY")
+  // Invoice settings
+  companyTaxId          String?  // NIF/CIF
+  companyAddress        String?
+  companyCity           String?
+  companyPostalCode     String?
+  companyCountry        String?  @default("España")
+  companyPhone          String?
+  companyEmail          String?
+  companyWebsite        String?
+  invoicePrefix         String   @default("FAC")
+  invoiceStartingNumber Int      @default(1)
+  invoiceDefaultTaxRate Decimal  @default(21) @db.Decimal(5,2)
+  invoiceDefaultDueDays Int      @default(30)
+  invoiceTerms          String?
+  invoiceNotes          String?
+  // Email settings
+  smtpHost              String?
+  smtpPort              Int?
+  smtpUser              String?
+  smtpPassword          String?
+  emailFrom             String?
+  emailFromName         String?
+  companyId             String   @unique
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("system_config")
+}
+
+model TrashConfig {
+  id                String   @id @default(cuid())
+  autoDeleteDays    Int      @default(10)
+  autoDeleteEnabled Boolean  @default(true)
+  companyId         String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("trash_config")
+}
+
+model MonthlyStats {
+  id               String   @id @default(cuid())
+  year             Int
+  month            Int
+  monthlyRevenue   Decimal  @default(0)
+  monthlyCosts     Decimal  @default(0)
+  monthlyProfit    Decimal  @default(0)
+  activeClients    Int      @default(0)
+  activeServices   Int      @default(0)
+  activeDomains    Int      @default(0)
+  activeHosting    Int      @default(0)
+  companyId        String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, year, month])
+  @@index([companyId])
+  @@map("monthly_stats")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+enum ClientStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+enum ServiceType {
+  WEB
+  HOSTING
+  MAINTENANCE
+  SEO
+  DOMAIN
+  EMAIL
+  OTHER
+}
+
+enum ServiceStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+enum DomainStatus {
+  ACTIVE
+  EXPIRED
+  PENDING
+}
+
+enum ReminderType {
+  SERVICE_RENEWAL
+  DOMAIN_EXPIRY
+  HOSTING_RENEWAL
+  CLIENT_ANNIVERSARY
+  CUSTOM_ALARM
+  CONTRACT_END
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  DISMISSED
+  SNOOZED
+}
+
+enum AlarmType {
+  CONTRACT_END
+  ANNIVERSARY
+  FOLLOW_UP
+  PAYMENT_DUE
+  CUSTOM
+  INACTIVE_CLIENT
+}
+
+enum AlarmPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  RESTORE
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+}
+
+enum PaymentEntityType {
+  SERVICE
+  HOSTING
+  DOMAIN
+  CUSTOM
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+// ============================================
+// AUDIT LOG (Company-scoped)
+// ============================================
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String
+  action      AuditAction
+  entityType  String
+  entityId    String
+  entityName  String
+  oldValue    String?
+  newValue    String?
+  description String
+  ipAddress   String?
+  userAgent   String?
+  companyId   String
+  createdAt   DateTime    @default(now())
+  
+  user        User        @relation(fields: [userId], references: [id])
+  company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================
+// PAYMENTS
+// ============================================
+model Payment {
+  id               String        @id @default(cuid())
+  clientId         String
+  entityType       PaymentEntityType
+  entityId         String
+  amount           Decimal       @default(0)
+  currency         String        @default("EUR")
+  status           PaymentStatus @default(PENDING)
+  stripePaymentId  String?       @unique
+  stripeSessionId  String?       @unique
+  paymentMethod    String?
+  description      String?
+  dueDate          DateTime?
+  paidAt           DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  client           Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([status])
+  @@index([entityType])
+  @@index([dueDate])
+  @@map("payments")
+}
+
+// ============================================
+// INVOICES
+// ============================================
+model Invoice {
+  id                   String        @id @default(cuid())
+  number               String        @unique
+  clientId             String
+  client               Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  // Client data at invoice time (for history)
+  clientName           String
+  clientEmail          String?
+  clientAddress        String?
+  clientTaxId          String?
+  
+  // Dates
+  issueDate            DateTime      @default(now())
+  dueDate              DateTime?
+  
+  // Language for PDF generation (de, fr, it, en, es)
+  language             String        @default("es")
+  
+  // Totals
+  subtotal             Decimal       @default(0) @db.Decimal(12,2)
+  taxRate              Decimal       @default(21) @db.Decimal(5,2)
+  taxAmount            Decimal       @default(0) @db.Decimal(12,2)
+  total                Decimal       @default(0) @db.Decimal(12,2)
+  
+  // Status
+  status               InvoiceStatus @default(DRAFT)
+  paidAt               DateTime?
+  
+  // Notes
+  notes                String?
+  terms                String?
+  
+  // Email
+  emailSent            Boolean       @default(false)
+  emailSentAt          DateTime?
+  
+  // Stripe
+  stripePaymentIntentId String?
+  stripeSessionId       String?
+  
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  deletedAt            DateTime?
+  
+  items                InvoiceItem[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([issueDate])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Decimal  @default(1) @db.Decimal(10,2)
+  unitPrice   Decimal  @db.Decimal(12,2)
+  taxRate     Decimal  @default(21) @db.Decimal(5,2)
+  total       Decimal  @db.Decimal(12,2)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+model InvoiceCounter {
+  id          String   @id @default(cuid())
+  year        Int
+  lastNumber  Int      @default(0)
+  companyId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, year])
+  @@map("invoice_counter")
+}
+
+// ============================================
+// CALENDAR NOTES - Personal notes on calendar
+// ============================================
+model CalendarNote {
+  id          String   @id @default(cuid())
+  date        DateTime
+  title       String
+  description String?
+  color       String   @default("brand") // brand, emerald, blue, orange, red, purple
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  companyId   String
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([date])
+  @@map("calendar_notes")
+}
+
+// ============================================
+// CLIENT FILES - Attachments for clients
+// ============================================
+model ClientFile {
+  id          String   @id @default(cuid())
+  clientId    String
+  name        String
+  originalName String
+  mimeType    String
+  size        Int      // in bytes
+  data        Bytes    // file content stored as bytes
+  description String?
+  category    String   @default("general") // general, contract, invoice, other
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([category])
+  @@map("client_files")
+}
