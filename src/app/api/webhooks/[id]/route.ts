@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getAuthUser } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth'
 import { WEBHOOK_EVENTS } from '../route'
 
 // GET - Get single webhook
@@ -9,7 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getAuthUser(request)
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
@@ -49,7 +49,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getAuthUser(request)
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
@@ -112,7 +112,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getAuthUser(request)
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }

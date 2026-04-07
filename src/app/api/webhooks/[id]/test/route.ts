@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getAuthUser } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth'
 import crypto from 'crypto'
 
 // POST - Test a webhook by sending a test payload
@@ -9,7 +9,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getAuthUser(request)
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getAuthUser } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth'
 
 // Available webhook events
 export const WEBHOOK_EVENTS = [
@@ -26,9 +26,9 @@ export const WEBHOOK_EVENTS = [
 ] as const
 
 // GET - List all webhooks for company
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const user = await getAuthUser(request)
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 // POST - Create new webhook
 export async function POST(request: NextRequest) {
   try {
-    const user = await getAuthUser(request)
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }

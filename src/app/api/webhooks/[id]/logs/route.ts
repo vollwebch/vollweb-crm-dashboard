@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getAuthUser } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth'
 
 // GET - Get logs for a webhook
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getAuthUser(request)
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
@@ -64,7 +64,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getAuthUser(request)
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
