@@ -2905,6 +2905,12 @@ export default function Dashboard() {
                 <Settings className="h-4 w-4 text-muted-foreground" />
               </Button>
               )}
+              <Button variant="ghost" size="icon" onClick={() => router.push('/tickets')} className="relative h-9 w-9" title="Tickets de Soporte">
+                <MessageCircle className="h-4 w-4 text-muted-foreground" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => router.push('/quotes')} className="relative h-9 w-9" title="Cotizaciones">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </Button>
               {hasPermission('config') && (
               <Button variant="ghost" size="icon" onClick={() => router.push('/webhooks')} className="relative h-9 w-9" title="Webhooks">
                 <Webhook className="h-4 w-4 text-muted-foreground" />
@@ -2913,6 +2919,11 @@ export default function Dashboard() {
               <Button variant="ghost" size="icon" onClick={() => router.push('/settings')} className="relative h-9 w-9" title="Empresa y Empleados">
                 <Users className="h-4 w-4 text-muted-foreground" />
               </Button>
+              {hasPermission('config') && (
+              <Button variant="ghost" size="icon" onClick={() => router.push('/client-users')} className="relative h-9 w-9" title="Usuarios del Portal">
+                <UserPlus className="h-4 w-4 text-muted-foreground" />
+              </Button>
+              )}
               {/* Theme Toggle */}
               {mounted && (
                 <Button

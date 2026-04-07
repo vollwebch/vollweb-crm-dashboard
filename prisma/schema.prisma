@@ -699,7 +699,7 @@ model Ticket {
   clientUserId String?
   clientUser  ClientUser?  @relation(fields: [clientUserId], references: [id], onDelete: SetNull)
   assignedToId String?
-  assignedTo  User?        @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  assignedTo  User?        @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
   messages    TicketMessage[]
   
   // Timestamps
